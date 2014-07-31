@@ -1,4 +1,4 @@
-package build
+package user
 
 import (
 	"reflect"
@@ -6,7 +6,6 @@ import (
 	. "com/j8tao/aim/core"
 	. "com/j8tao/aim/cfg"
 	. "com/j8tao/aim/db"
-	. "com/j8tao/aim/user"
 	"os/exec"
 )
 
@@ -34,19 +33,6 @@ type BuildInfo struct {
 	Result uint16
 }
 
-func initBuild() {
-	isSuccess := RegisterMsgFunc(CMD_BUILD, createBuildNetMsg)
-	if !isSuccess {
-		LogInfo("Registor MsgBuild faild")
-	}
-}
-
-func createBuildNetMsg(cmdData *Command) NetMsg {
-	netMsg := &MsgBuild{}
-	netMsg.CreateByBytes(cmdData.Message.([]byte))
-	return netMsg
-}
-
 func (this *MsgBuild) GetNetBytes() ([]byte, bool) {
 	return GenNetBytes(uint16(CMD_BUILD), reflect.ValueOf(this))
 }
@@ -60,7 +46,6 @@ func (this *MsgBuild) Process(p interface{}) {
 	if !ok {
 		return
 	}
-
 	switch this.Action{
 	case QUERY:
 		this.query(puser)
@@ -91,9 +76,9 @@ func (this *MsgBuild) build(user *User, cmds string) {
 
 }
 
-func execBuild(cmds string, project *Project, user1 *User, msgBuild *MsgBuild) {
+func execBuild(cmds string, project *Project, user *User, msgBuild *MsgBuild) {
 	var err error
-	_, err = DBMgr.PreExecute("update t_vb_project set isBuilding = 1, builder=? where id = ?", string(user1.ID), project.ID)
+	_, err = DBMgr.PreExecute("update t_vb_project set isBuilding = 1, builder=? where id = ?", string(user.ID), project.ID)
 
 	defer func() {
 		_, err = DBMgr.PreExecute("update t_vb_project set isBuilding = 0, builder=? where id = ?", "", project.ID)
@@ -142,7 +127,7 @@ func execBuild(cmds string, project *Project, user1 *User, msgBuild *MsgBuild) {
 	LogInfo("编译完成", cmds)
 }
 
-func (this *MsgBuild) query(user1 *User) {
+func (this *MsgBuild) query(user *User) {
 	rows, err := DBMgr.PreQuery("select id, pname, pvname, isBuilding, builder from t_vb_project")
 	if err != nil {
 		fmt.Println(err)
@@ -164,6 +149,6 @@ func (this *MsgBuild) query(user1 *User) {
 	}
 
 	this.PData = totalData
-	user1.Sender.Send(this)
+	user.Sender.Send(this)
 }
 

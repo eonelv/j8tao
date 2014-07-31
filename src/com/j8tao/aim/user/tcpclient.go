@@ -9,6 +9,7 @@ import (
 	"time"
 	"io"
 	"reflect"
+	"fmt"
 )
 
 const (
@@ -23,6 +24,7 @@ type TCPClient struct {
 	dataChan     chan *Command // 自身接收用的channel
 	userChan chan *Command // 跟自己相关的User的接收channel
 	isLogin bool
+	UserEncrypt *Encrypt
 }
 
 func ProcessRecv(client *TCPClient) {
@@ -39,6 +41,9 @@ func ProcessRecv(client *TCPClient) {
 		}
 	}()
 	defer client.close()
+	client.UserEncrypt = &Encrypt{}
+	client.UserEncrypt.InitEncrypt(164, 29, 30, 60, 241, 79, 251, 107)
+	client.Sender.UserEncrypt = client.UserEncrypt
 	for {
 		headerBytes := make([]byte, HEADER_LENGTH)
 		_, err := io.ReadFull(conn, headerBytes)
@@ -63,6 +68,10 @@ func ProcessRecv(client *TCPClient) {
 			}
 			return
 		}
+		client.UserEncrypt.Encrypt(headerBytes, 0, len(headerBytes), true)
+		for i := 0; i < len(headerBytes); i++ {
+			fmt.Println("Receive Data is ", headerBytes[i])
+		}
 		header := &PackHeader{}
 		Byte2Struct(reflect.ValueOf(header), headerBytes)
 
@@ -72,6 +81,10 @@ func ProcessRecv(client *TCPClient) {
 			LogError(err.Error())
 			break
 		}
+
+		client.UserEncrypt.Encrypt(bodyBytes, 0, len(bodyBytes), false)
+		client.UserEncrypt.Reset()
+
 		client.processClientMessage(header, bodyBytes)
 	}
 	LogInfo("TCPClient cant receive data no more")
