@@ -20,7 +20,6 @@ func CreateDBMgr(path string) bool {
 	}
 	DBMgr = DataBaseMgr{}
 	DBMgr.dbServer = db
-	LogInfo("DataBase connect success.")
 	return true
 }
 
@@ -48,6 +47,7 @@ func (this *DataBaseMgr) Query(sql string, args ...interface{}) ([]*RowSet, erro
 }
 
 func (this *DataBaseMgr) PreQuery(sql string, args ...interface{}) ([]*RowSet, error) {
+	LogInfo(sql, args)
 	stmt,err := this.dbServer.Prepare(sql)
 	if err != nil {
 		return nil, err
@@ -65,7 +65,6 @@ func (this *DataBaseMgr) PreQuery(sql string, args ...interface{}) ([]*RowSet, e
 
 func (this *DataBaseMgr) buildRowSets(rows *SQL.Rows) ([]*RowSet, error) {
 	colNames,err := rows.Columns()
-
 	if err != nil {
 		return nil, err
 	}

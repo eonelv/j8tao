@@ -14,6 +14,8 @@ type TCPSender struct {
 
 func CreateTCPSender(conn *net.TCPConn) *TCPSender {
 	sender := &TCPSender{*conn, make(chan []byte), make(chan bool, 1), nil}
+	sender.UserEncrypt = &Encrypt{}
+	sender.UserEncrypt.InitEncrypt(164, 29, 30, 60, 241, 79, 251, 107)
 	if sender == nil {
 		return nil
 	}
@@ -25,6 +27,7 @@ func (sender *TCPSender) Send(msg NetMsg) {
 	if !ok {
 		return
 	}
+
 	sender.UserEncrypt.Encrypt(bytes, 0, len(bytes), false)
 	sender.SendBytes(bytes)
 }

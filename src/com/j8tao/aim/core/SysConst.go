@@ -1,6 +1,6 @@
 package core
 
-type ObjectID string
+type ObjectID uint64
 type NAME_STRING [NAME_LENGTH]byte
 
 const (
@@ -11,6 +11,6 @@ const (
 )
 
 const (
-	SYSTEM_CHAN_ID ObjectID = "systemchanid"
-	SYSTEM_USER_CHAN_ID ObjectID = "systemuserchanid"
+	SYSTEM_CHAN_ID ObjectID = 100
+	SYSTEM_USER_CHAN_ID ObjectID = 101
 )

@@ -15,6 +15,10 @@ type PackHeader struct {
 }
 
 const (
+	CMD_CONNECTION uint16 = 1001
+	CMD_REGISTER uint16 = 1002
+	CMD_LOGIN uint16 = 1003
+	//CMD_REGISTER uint16 = 1004
 	CMD_BUILD uint16 = 1010
 )
 

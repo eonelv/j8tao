@@ -3,6 +3,7 @@ package user
 import (
 	. "com/j8tao/aim/core"
 	"time"
+	. "com/j8tao/aim/db"
 )
 
 var UserMgr UserManager
@@ -11,12 +12,22 @@ type UserManager struct {
 	systemChan chan *Command
 }
 
-func CreateUserMgr() bool {
+func CreateUserMgr() (bool, error) {
 	UserMgr = UserManager{}
 	UserMgr.systemChan = make(chan *Command)
 	UserMgr.users = make(map[ObjectID]*User)
+
+	rows, err := DBMgr.Query("select * from t_bd_user where id > 0")
+	if err != nil {
+		return false, err
+	}
+	for _, row := range rows {
+		id := row.GetObjectID("id")
+		u := CreateUser(id)
+		UserMgr.users[id] = u
+	}
 	go startRecv(&UserMgr)
-	return true
+	return true, nil
 }
 
 func startRecv(userMgr *UserManager) {

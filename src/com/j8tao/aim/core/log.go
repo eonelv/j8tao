@@ -19,7 +19,7 @@ var (
 func initLog() {
 	var logger ELogger
 	log.SetOutput(&logger)
-
+	log.SetFlags(log.Lshortfile | log.LstdFlags)
 	os.MkdirAll(logPath, os.ModeDir)
 }
 

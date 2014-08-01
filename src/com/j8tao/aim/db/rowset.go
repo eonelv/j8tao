@@ -29,6 +29,9 @@ func (rowSet *RowSet) GetString(name string) string {
 	return result
 }
 
+func (rowSet *RowSet) GetObjectID(name string) ObjectID {
+	return ObjectID(rowSet.GetUint64(name))
+}
 func (rowSet *RowSet) GetUint64(name string) uint64 {
 	var result uint64
 	err := rowSet.GetValue(name, &result)

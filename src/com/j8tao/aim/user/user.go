@@ -78,8 +78,8 @@ func (user *User) processInnerMessage(msg *Command) {
 func (user *User) userLogin(msg *Command) {
 	user.Status = USER_STATUS_ONLINE
 	user.netChan = msg.RetChan
-	user.Sender = msg.OtherInfo.(*TCPSender)
 
+	user.Sender = msg.OtherInfo.(*TCPSender)
 	msg.RetChan = user.recvChan
 	user.netChan <- msg
 }
@@ -93,9 +93,9 @@ func (user *User) userOffline(msg *Command) {
 	if msg.RetChan != user.netChan {
 		return
 	}
-	UnRegisterChan(user.ID)
-	close(user.recvChan)
-	close(user.innerChan)
+//	UnRegisterChan(user.ID)
+//	close(user.recvChan)
+//	close(user.innerChan)
 	user.Sender.Close()
 	user.Status = USER_STATUS_OFFLINE
 	fmt.Println("User offline", user.ID)

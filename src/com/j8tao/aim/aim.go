@@ -10,8 +10,11 @@ import (
 	. "com/j8tao/aim/db"
 	_ "com/j8tao/aim/cfg"
 	. "com/j8tao/aim/user"
+	. "com/j8tao/aim/login"
 	"runtime"
 	"fmt"
+	"reflect"
+	"regexp"
 )
 
 func main() {
@@ -23,26 +26,31 @@ func Start() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	cfgOK, cfgErr := cfg.LoadCfg()
 	LogInfo("")
-	LogInfo("---------------------------------")
+	LogInfo("------------------start server-----------------------")
 	if !cfgOK {
 		LogInfo("Load server config error.", cfgErr)
 		os.Exit(100)
 	}
-	LogInfo("Load server config success.")
+
 	if !CreateDBMgr(cfg.GetServerHome() + "/" + cfg.GetDBName()) {
 		LogError("Connect dataBase error")
 		os.Exit(101)
 	}
+
 	CreateChanMgr()
-	CreateUserMgr()
+	if ok, err := CreateUserMgr(); !ok{
+		LogError("Create user manager error.", err)
+		return
+	}
+
 	sysChan := make(chan *Command)
 	RegisterChan(SYSTEM_CHAN_ID, sysChan)
 	go processTCP()
-	LogInfo("Server bootup success.")
+
 	for {
 		select {
 		case msg := <-sysChan:
-			LogInfo("main recv msg:", msg.Cmd)
+			LogInfo("system command :", msg.Cmd)
 			if msg.Cmd == CMD_SYSTEM_MAIN_CLOSE {
 				return
 			}
@@ -58,6 +66,11 @@ func checkError(err error){
 }
 
 func processTCP() {
+	defer func() {
+		if err := recover(); err != nil {
+			LogError(err)    //这里的err其实就是panic传入的内容
+		}
+	}()
 	service := fmt.Sprintf(":%d",  cfg.GetServerPort())
 	tcpAddr, err := net.ResolveTCPAddr("tcp4", service)
 	checkError(err)
@@ -73,9 +86,16 @@ func processTCP() {
 }
 
 func processConnect(conn *net.TCPConn){
+	defer func() {
+		if err := recover(); err != nil {
+			LogError(err)    //这里的err其实就是panic传入的内容
+		}
+	}()
 	client := &TCPClient{}
 	objID := conn.RemoteAddr().String()
-	client.ID = ObjectID(objID)
+	re := regexp.MustCompile(`(\d+\.\d+\.\d+\.\d+)|(\d+)`)
+	ips := re.FindStringSubmatch(objID)
+	CopyArray(reflect.ValueOf(&client.AccountID), []byte(ips[0]))
 	client.Conn = conn
 	client.Sender = CreateTCPSender(conn)
 	go ProcessRecv(client)
