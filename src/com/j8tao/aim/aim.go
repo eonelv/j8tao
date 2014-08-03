@@ -11,6 +11,7 @@ import (
 	_ "com/j8tao/aim/cfg"
 	. "com/j8tao/aim/user"
 	. "com/j8tao/aim/login"
+	. "com/j8tao/aim/idmgr"
 	"runtime"
 	"fmt"
 	"reflect"
@@ -36,7 +37,7 @@ func Start() {
 		LogError("Connect dataBase error")
 		os.Exit(101)
 	}
-
+	InitGenerator()
 	CreateChanMgr()
 	if ok, err := CreateUserMgr(); !ok{
 		LogError("Create user manager error.", err)

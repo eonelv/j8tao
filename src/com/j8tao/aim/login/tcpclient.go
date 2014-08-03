@@ -126,6 +126,7 @@ func (client *TCPClient) processLogin(header *PackHeader, datas []byte) {
 		msgLogin.CreateByBytes(datas)
 		userID = msgLogin.ID
 		targetChan = GetChanByID(userID)
+		LogInfo("登录用户ID：", userID)
 
 	} else if header.Cmd == CMD_REGISTER {
 		msgUserRegister := &MsgUserRegister{}
@@ -138,7 +139,7 @@ func (client *TCPClient) processLogin(header *PackHeader, datas []byte) {
 		select {
 		case id := <- chanRet:
 			userID = id
-		case <-time.After(5 * time.Second):
+		case <-time.After(20 * time.Second):
 			LogError("register put user channel failed:", header.Cmd)
 			client.Sender.Send(msgUserRegister)
 			return

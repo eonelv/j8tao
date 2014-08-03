@@ -23,6 +23,7 @@ func GetChanByID(id ObjectID) chan *Command {
 func RegisterChan(id ObjectID, ch chan *Command) bool {
 	_, ok := chanDatas[id]
 	if ok {
+		LogInfo("注册chan失败", id)
 		return false
 	}
 	mutex.Lock()

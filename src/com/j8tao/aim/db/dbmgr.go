@@ -28,6 +28,7 @@ func (this *DataBaseMgr) Execute(sql string)(SQL.Result, error) {
 }
 
 func (this *DataBaseMgr) PreExecute(sql string, args...interface {})(SQL.Result, error) {
+	LogInfo(sql, args)
 	stmt,err := this.dbServer.Prepare(sql)
 	if err != nil {
 		return nil, err
