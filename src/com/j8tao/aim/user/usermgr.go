@@ -66,8 +66,10 @@ func (this *UserManager) processUserLogin(msg *Command) {
 
 func (this *UserManager)processBroadCast(msg NetMsg) {
 	for _, u := range this.users {
+		if u.Status == USER_STATUS_INIT {
+			continue
+		}
 		u.Sender.Send(msg)
-		LogError("BroadcastMessage to User," ,u.ID, u.Status)
 	}
 }
 

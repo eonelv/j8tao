@@ -1,8 +1,6 @@
 package core
 
-import (
-	"reflect"
-)
+import "reflect"
 
 func CopyArray(dest reflect.Value, src []byte) bool {
 	defer func() {
@@ -12,3 +10,4 @@ func CopyArray(dest reflect.Value, src []byte) bool {
 	}()
 	return reflect.Copy(dest.Elem(), reflect.ValueOf(src)) > 0
 }
+

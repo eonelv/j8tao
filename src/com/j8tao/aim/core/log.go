@@ -1,12 +1,13 @@
 package core
 
 import (
-	"os"
-	"log"
-	"fmt"
-	"time"
-	"strings"
 	. "com/j8tao/aim/cfg"
+	"fmt"
+	"log"
+	"os"
+	"runtime"
+	"strings"
+	"time"
 )
 
 type ELogger struct {
@@ -19,20 +20,32 @@ var (
 func initLog() {
 	var logger ELogger
 	log.SetOutput(&logger)
-	log.SetFlags(log.Lshortfile | log.LstdFlags)
 	os.MkdirAll(logPath, os.ModeDir)
 }
 
-func LogInfo(v ...interface{}) {
-	log.Printf("Info: %v \n", strings.TrimRight(fmt.Sprintln(v...), "\n"))
+func output(keyworlds string, v ...interface {}) {
+	_, file, line, ok := runtime.Caller(2)
+	var shortFile string
+	if !ok {
+		shortFile = "???"
+		line = 0
+	} else {
+		index := strings.LastIndex(file, "/")
+		shortFile = string([]byte(file)[index+1:])
+	}
+	log.Printf("[%v(%d)] %v: %v \n", shortFile, line, keyworlds, strings.TrimRight(fmt.Sprintln(v...), "\n"))
 }
 
-func LogError(v ...interface {}) {
-	log.Printf("Error: %v \n", strings.TrimRight(fmt.Sprintln(v...), "\n"))
+func LogInfo(v ...interface{}) {
+	output("Info", v...)
+}
+
+func LogError(v ...interface{}) {
+	output("Error", v...)
 }
 
 func getLogFile(t time.Time) string {
-	return fmt.Sprintf("%s/goserver%d-%d-%d.log", logPath, t.Year(), t.Month(), t.Day())
+	return fmt.Sprintf("%s/goserver%s.log", logPath, t.Format("2006-01-02"))
 }
 
 func (this *ELogger) Write(p []byte) (int, error) {

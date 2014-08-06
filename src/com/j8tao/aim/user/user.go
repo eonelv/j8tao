@@ -1,7 +1,6 @@
 package user
 
 import (
-	"fmt"
 	. "com/j8tao/aim/core"
 )
 
@@ -82,6 +81,15 @@ func (user *User) userLogin(msg *Command) {
 	user.Sender = msg.OtherInfo.(*TCPSender)
 	msg.RetChan = user.recvChan
 	user.netChan <- msg
+
+	//Timer的使用
+//	timer := &Timer{}
+//	timer.Start(int64(1000))
+//	for {
+//		if <-timer.GetChannel() {
+//			LogInfo("+1")
+//		}
+//	}
 }
 
 func (user *User) userOffline(msg *Command) {
@@ -98,5 +106,5 @@ func (user *User) userOffline(msg *Command) {
 //	close(user.innerChan)
 	user.Sender.Close()
 	user.Status = USER_STATUS_OFFLINE
-	fmt.Println("User offline", user.ID)
+	LogInfo("User offline", user.ID)
 }

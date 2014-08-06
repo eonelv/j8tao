@@ -25,7 +25,7 @@ func RegisterMsgFunc(cmd uint16, msgFunc CreateNetMsgFunc) bool {
 func CreateNetMsg(msg *Command) NetMsg {
 	createFunc := netMsgs[msg.Cmd]
 	if createFunc == nil {
-		LogError("UnKnown Command")
+		LogError("UnKnown Command", msg.Cmd)
 		return nil
 	}
 	return createFunc(msg)

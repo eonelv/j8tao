@@ -1,21 +1,21 @@
 package main
 
 import (
+	"com/j8tao/aim/cfg"
+	_ "com/j8tao/aim/cfg"
+	. "com/j8tao/aim/core"
 	_ "com/j8tao/aim/core"
-	_ "com/j8tao/aim/build"
+	. "com/j8tao/aim/db"
+	. "com/j8tao/aim/idmgr"
+	. "com/j8tao/aim/login"
+	. "com/j8tao/aim/user"
+	_ "com/j8tao/aim/message"
+	"fmt"
 	"net"
 	"os"
-	. "com/j8tao/aim/core"
-	"com/j8tao/aim/cfg"
-	. "com/j8tao/aim/db"
-	_ "com/j8tao/aim/cfg"
-	. "com/j8tao/aim/user"
-	. "com/j8tao/aim/login"
-	. "com/j8tao/aim/idmgr"
-	"runtime"
-	"fmt"
 	"reflect"
 	"regexp"
+	"runtime"
 )
 
 func main() {
@@ -39,7 +39,7 @@ func Start() {
 	}
 	InitGenerator()
 	CreateChanMgr()
-	if ok, err := CreateUserMgr(); !ok{
+	if ok, err := CreateUserMgr(); !ok {
 		LogError("Create user manager error.", err)
 		return
 	}
@@ -59,7 +59,7 @@ func Start() {
 	}
 }
 
-func checkError(err error){
+func checkError(err error) {
 	if err != nil {
 		LogError(err)
 		os.Exit(0)
@@ -69,16 +69,16 @@ func checkError(err error){
 func processTCP() {
 	defer func() {
 		if err := recover(); err != nil {
-			LogError(err)    //这里的err其实就是panic传入的内容
+			LogError(err) //这里的err其实就是panic传入的内容
 		}
 	}()
-	service := fmt.Sprintf(":%d",  cfg.GetServerPort())
+	service := fmt.Sprintf(":%d", cfg.GetServerPort())
 	tcpAddr, err := net.ResolveTCPAddr("tcp4", service)
 	checkError(err)
 	listener, err := net.ListenTCP("tcp", tcpAddr)
 	checkError(err)
 	for {
-		conn,err := listener.AcceptTCP()
+		conn, err := listener.AcceptTCP()
 		if err != nil {
 			continue
 		}
@@ -86,10 +86,10 @@ func processTCP() {
 	}
 }
 
-func processConnect(conn *net.TCPConn){
+func processConnect(conn *net.TCPConn) {
 	defer func() {
 		if err := recover(); err != nil {
-			LogError(err)    //这里的err其实就是panic传入的内容
+			LogError(err) //这里的err其实就是panic传入的内容
 		}
 	}()
 	client := &TCPClient{}
@@ -101,9 +101,3 @@ func processConnect(conn *net.TCPConn){
 	client.Sender = CreateTCPSender(conn)
 	go ProcessRecv(client)
 }
-
-
-
-
-
-
